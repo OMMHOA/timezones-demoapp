@@ -1,0 +1,228 @@
+swagger: "2.0"
+info:
+  title: "Timezones"
+  description: "A REST API that shows time in different timezones"
+  version: "1.0.0"
+paths:
+  /user/registration:
+    post:
+      tags: 
+      - "User management"
+      description: "Registration endpoint for a new user. The newly created user does not have admin rights."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User credentials."
+        required: true
+        schema:
+          $ref: "#/definitions/UserCredentials"
+      responses:
+        "201":
+          description: "New user created."
+        "422":
+          description: "There was some problem with the provided credentials."
+        "400":
+          description: "Authorization header is missing."
+  /user/login:
+    post:
+      tags: 
+      - "User management"
+      description: "Registration endpoint for a new user. The newly created user does not have admin rights."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User credentials."
+        required: true
+        schema:
+          $ref: "#/definitions/UserCredentials"
+      responses:
+        "201":
+          description: "New user created."
+        "422":
+          description: "There was some problem with the provided credentials."
+        "400":
+          description: "Authorization header is missing."
+  /user/{userName}:
+    put:
+      tags:
+      - "User management"
+      description: "Update username, password or admin status."
+      parameters:
+      - in: "path"
+        name: "userName"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: "User update successful"
+    delete:
+      tags: 
+      - "User management"
+      description: "Delete user."
+      parameters:
+      - in: "path"
+        name: "userName"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "User was successfully deleted."
+        "401":
+          description: "No rights to delete user."
+        "400":
+          description: "Authorization header is missing."
+  /admin/users:
+    get:
+      tags:
+      - "User management"
+      description: "An endpoint usable only by admins. Get the list of all users."
+      parameters:
+      responses:
+        "200":
+          description: "List of all users"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                username:
+                  type: "string"
+                isAdmin:
+                  type: boolean
+        "401":
+          description: "No admin rights."
+        "400":
+          description: "Authorization header is missing."
+  /timezones/{userName}:
+    get:
+      tags:
+      - "Timezone"
+      description: "Get the list of the user's current time in timezones."
+      parameters:
+      - in: "path"
+        name: "userName"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "List of time in all of the user's timezones"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TimeInTimezone"
+        "401":
+          description: "No rights to access user's data."
+        "400":
+          description: "Authorization header is missing."
+    post:
+      tags:
+      - "Timezone"
+      description: "Add a new timezone for user."
+      parameters:
+      - in: "path"
+        name: "userName"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Timezone details."
+        required: true
+        schema:
+          $ref: "#/definitions/Timezone"
+      responses:
+        "200":
+          description: "Timezone added successfully"
+        "422":
+          description: "Payload validation failed"
+        "401":
+          description: "No rights to access user's data."
+        "400":
+          description: "Authorization header is missing."
+  /timezones/{userName}/{timezoneName}:
+    put:
+      tags:
+      - "Timezone"
+      description: "Update timezone details for user."
+      parameters:
+      - in: "path"
+        name: "userName"
+        required: true
+        type: "string"
+      - in: "path"
+        name: "timezoneName"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/Timezone"
+      responses:
+        "200":
+          description: "Timezone details updated successfully."
+        "422":
+          description: "Payload validation failed"
+        "401":
+          description: "No rights to modify timezone details."
+        "400":
+          description: "Authorization header is missing."
+    delete:
+      tags:
+      - "Timezone"
+      description: "Delete timezone details for user"
+      parameters:
+      - in: "path"
+        name: "userName"
+        required: true
+        type: "string"
+      - in: "path"
+        name: "timezoneName"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Timezone details deleted successfully."
+        "401":
+          description: "No rights to modify timezone details."
+        "400":
+          description: "Authorization header is missing."
+
+definitions:
+  UserCredentials:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  User:
+    allOf:
+      - $ref: "#/definitions/UserCredentials"
+      - type: object
+        properties:
+          isAdmin:
+            type: boolean
+  Timezone:
+    type: object
+    properties:
+      name:
+        type: string
+      cityName:
+        type: string
+        example: "Helsinki"
+      GMT:
+        type: integer
+        example: 3
+  TimeInTimezone:
+    allOf:
+      - $ref: "#/definitions/Timezone"
+      - type: object
+        properties:
+          time:
+            type: string
+            example: "13:45:30"
